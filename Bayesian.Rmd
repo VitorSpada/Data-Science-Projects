@@ -1,0 +1,95 @@
+---
+title: "Estatística bayesiana com Rjags"
+author: "Vitor Spada"
+date: "19 de outubro de 2018"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Estatística Bayesiana
+Apesar de muitos desconhecerem (inclusive  os próprios estudantes de áreas quantitativas) há diferentes correntes na estatística, que diferem quanto a probabilidade e inferência. O que geralmente é ensinado na academia principalmente na graduação é a estatística denominada frequentista. Porém, nos últimos anos a estatística bayesiana vem ganhando espaço entre os estudiosos, muito por conta do avanço da estatística computacional (alguns resultados eram impossíveis de serem obtidos matematicamente) e resolução de alguns paradigmas. A estatística bayesiana é interessante por oferecer a possibilidade do pesquisador  levar em consideração suas concepções sobre determinado evento nos seus cálculos e inferências.
+Logo, a abordagem bayesiana pode ser de grande utilidade para um cientista de dados, e aqui vamos ver como utilizá-la com RJags.
+
+
+## Estudo do sono
+No nosso exempplo, utilizaremos dados de um estudo interessado em ver o quanto a ausência do sono afeta a reação do ser humano. O modelo utilizado será o chamado normal-normal, em que acreditamos que a variação do tempo de reação possui  parâmetros média e desvio padrão , os quais seguem uma distribuição normal. Então, primeiramente vamos importar os dados, lembrando que é necessário a instalaçao do Jags separadamente do R, já que ele é um programa separado, além do pacote Rjags no R.
+
+```{r}
+library(dplyr)
+library(rjags)
+library(ggplot2)
+Sleep <- read.csv("~/Sleep.txt", row.names=1)
+```
+
+
+## Normal-normal
+Eis o modelo propriamente dito. A sintaxe abaixo já é do Rjags, que é diferente do R. Aqui entra a subjetividade dita anteriormente. Antes de olharmos os dados como de costume, através da abordagem bayesiana podemos definir a "prior distribution", que seria a nossa crença acerca dos parâmetros que queremos estimar. No nosso caso, suponha que por meio de estudos tenhamos chegado a conclusão de que a média da variação do tempo de reação, segue uma distribuição normal com média 50 e desvio padrão de 25.
+Quanto ao desvio padrão, não temos certeza. Logo, vamos supor que ele pode ser qualquer valor num intervalo entre 0 e 200, representado pela distribuiçao uniforme (0:200)
+```{r}
+# DEFINE the model    
+sleep_model <- "model{
+    # Likelihood model for Y[i]
+    for(i in 1:length(Y)) {
+        Y[i] ~ dnorm(m, s^(-2))
+    }
+
+    # Prior models for m and s
+    m ~ dnorm(50, 25^(-2))
+    s ~ dunif(0, 200)
+}"
+```
+
+
+## Compilando o modelo
+
+Agora que já definimos o nosso modelo, precisamos conectá-lo a nossa base de dados. Foi feita uma manipulação básica no dplyr para obtenção de uma variável de interesse.
+
+```{r}
+# Define diff_3
+sleep_study <- Sleep %>% 
+  mutate(diff_3 = day_3 - day_0) 
+
+
+
+# COMPILE the model
+sleep_jags <- jags.model(
+  textConnection(sleep_model),
+  data = list(Y = sleep_study$diff_3),
+  inits = list(.RNG.name = "base::Wichmann-Hill", .RNG.seed = 1989)
+)
+
+```
+
+## Markov chain Monte Carlo e posterior distribution
+Quando utilizamos a abordagem bayesiana, queremos a distribuição de probabilidade, e nao uma estimativa apenas, como na abordagem frequentista. Por isso o que queremos obter é a posterior distribution. No comando abaixo, especificamos o modelo e os parâmetros, e estipulamos "n.itter=10000". Uma das formas de se obter a posterior distribution que ficou popularizada com o avanço da estatística computacional é através das chamadas Markov Chain Monte Carlo. Dessa forma, fugimos de dificuldade e conveniencia matemática, e podemos obter a posterior da forma que realmente acreditamos. O número de iterações mencionado será utilizado pela cadeia para gerar a nossa distribuição.
+Abaixo está a distribuição dos parâmetros do nosso modelo, que é resultado da nossa crença inicial e da observação dos dados.
+```{r}
+# SIMULATE the posterior    
+sleep_sim <- coda.samples(model = sleep_jags, variable.names = c("m", "s"), n.iter = 10000)
+
+# PLOT the posterior    
+plot(sleep_sim, trace = FALSE)
+```
+
+
+## Visualizando a cadeia de markov
+Abaixo está a cadeia de markov para um número de iterações de 10.000 do nosso parâmetro "m" (média)
+
+```{r}
+sleep_chains <- data.frame(sleep_sim[[1]], iter = 1:10000)
+
+#plot of the m chain
+ggplot(sleep_chains , aes(x = iter, y = m)) + 
+  geom_line()# Use ggplot() to construct a trace 
+
+# Trace plot the first 100 iterations of the m chain
+ggplot(sleep_chains[1:1000, ], aes(x = iter, y = m)) + 
+  geom_line()
+```
+
+## Conclusão
+A abordagem sempre será uma alternativa a abordagem frequentista, principalmente quando temos fortes convicões e conhecimento prévio acerca de um evento. Além disso, em vez de apenas um valor, obtemos sempre uma distribuição de probabilidades. Rjags faz incrivelmente todo esse processo rapidamente, sendo sem dúvida uma ferramenta de grande importância
