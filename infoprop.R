@@ -25,7 +25,7 @@ dados <- select(data, price, area, price_by_sqm,
                 garage, latitude, longitude)
 
 
-#PreÁo do condomÌnio em n˙mero
+#Pre√ßo do condom√≠nio em n√∫mero
 dados$condominium_fee <- as.numeric(
   gsub(".", "", 
        gsub("R$", "", 
@@ -33,7 +33,7 @@ dados$condominium_fee <- as.numeric(
             fixed = T),
        fixed = T ))
 
-#PreÁo do condomÌnio em n˙mero
+#Pre√ßo do condom√≠nio em n√∫mero
 dados$iptu <- as.numeric(
   gsub(".", "", 
        gsub("R$", "", 
@@ -41,7 +41,7 @@ dados$iptu <- as.numeric(
             fixed = T),
        fixed = T ))
 
-#Retirando que n„o tem latitude ou longitude
+#Retirando que n√£o tem latitude ou longitude
 dados <- dados[!(dados$latitude==""),]
 
 #Arrumando as latitudes e longitudes
@@ -73,7 +73,7 @@ ggpairs(data=data,
 
 mapa <- leaflet() %>% 
   addTiles() %>%  
-  addMarkers(lng=-46.668812, lat=-23.598892, popup="LocalizaÁ„o imÛvel")
+  addMarkers(lng=-46.668812, lat=-23.598892, popup="Localiza√ß√£o im√≥vel")
 mapa
 
 ggplot(data=dados, mapping= aes(x=rooms), na.rm = TRUE) + geom_bar(width=0.5,fill = "cyan3", color='black')
@@ -81,11 +81,11 @@ ggplot(data=dados, mapping= aes(x=garage), na.rm = TRUE) + geom_bar(width=0.8,fi
 ggplot(data=dados, mapping= aes(x=bathrooms), na.rm = TRUE) + geom_bar(width=1,fill = "skyblue", color='black' ) 
 ggplot(data=dados, aes(x=latitude, y=longitude)) + geom_point(colour="green")   + theme(axis.line=element_blank(),axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks=element_blank(), panel.background=element_blank(),panel.border=element_blank(),panel.grid.major=element_blank(),panel.grid.minor=element_blank(),plot.background=element_blank())
 
-qplot(dados$bathrooms,dados$price,colour=dados$bathrooms, xlab ="Banheiros", ylab="PreÁo($)")
-qplot(dados$area,dados$price,colour=dados$area, xlab ="¡rea", ylab="PreÁo($)")
-qplot(dados$garage,dados$price,colour=dados$garage, xlab ="Garagem", ylab="PreÁo($)")
-qplot(dados$rooms,dados$price,colour=dados$rooms, xlab ="Quartos", ylab="PreÁo($)")
-qplot(dados$longitude,dados$price, xlab ="Longitude", ylab="PreÁo($)", color="red")
+qplot(dados$bathrooms,dados$price,colour=dados$bathrooms, xlab ="Banheiros", ylab="Pre√ßo($)")
+qplot(dados$area,dados$price,colour=dados$area, xlab ="√Årea", ylab="Pre√ßo($)")
+qplot(dados$garage,dados$price,colour=dados$garage, xlab ="Garagem", ylab="Pre√ßo($)")
+qplot(dados$rooms,dados$price,colour=dados$rooms, xlab ="Quartos", ylab="Pre√ßo($)")
+qplot(dados$longitude,dados$price, xlab ="Longitude", ylab="Pre√ßo($)", color="red")
 
 
 
@@ -105,7 +105,7 @@ dados$garage=as.factor(dados$garage)
 dados$latitude=as.factor(dados$latitude)
 dados$longitude=as.factor(dados$longitude)
 
-#Tem uma casa que tem 54 banheiros. Vou tirar essa observaÁ„o
+#Tem uma casa que tem 54 banheiros. Vou tirar essa observa√ß√£o
 dados <- dados[!(dados$bathrooms==54),]
 
 #Seed e Split
@@ -123,11 +123,11 @@ modelo <- lm(price ~ (area + garage + rooms + bathrooms ) ,
              data = data_train)
 
 
-#Fazendo previsıes
+#Fazendo previs√µes
 data_train$pred <- predict(modelo)
 data_test$pred <- predict(modelo,newdata=data_test)
 
-# Dando uma olhada na raÌz do erro quadrado mÈdio e no desvio padr„o dos preÁos
+# Dando uma olhada na ra√≠z do erro quadrado m√©dio e no desvio padr√£o dos pre√ßos
 (rmse_train <- RMSE(data_train$pred, data_train$price))
 (rmse_test <- RMSE(data_test$pred, data_test$price))
 sd(dados$price)
@@ -142,11 +142,11 @@ dwtest(modelo)
 
 
 
-# Plotando as previsıes e os preÁos da base de teste
+# Plotando as previs√µes e os pre√ßos da base de teste
 ggplot(data_test, aes(x = pred, y = price)) + 
   geom_point() + 
   geom_abline() +
-  xlab("Previs„o")+ ylab ("Log PreÁo Real")
+  xlab("Previs√£o")+ ylab ("Log Pre√ßo Real")
 
 
 
@@ -161,12 +161,12 @@ plot(modelo2)
 
 
 
-#Fazendo previsıes 2
+#Fazendo previs√µes 2
 data_train$pred2 <- predict(modelo2)
 data_test$pred2 <- predict(modelo2,newdata=data_test)
 
 
-# Dando uma olhada na raÌz do erro quadrado mÈdio e no desvio padr„o dos preÁos
+# Dando uma olhada na ra√≠z do erro quadrado m√©dio e no desvio padr√£o dos pre√ßos
 (rmse_train <- RMSE(data_train$pred2, data_train$price))
 (rmse_test <- RMSE(data_test$pred2, data_test$price))
 sd(dados$price)
@@ -175,11 +175,11 @@ sd(dados$price)
 (rsq_test <- r_squared(data_test$pred2, data_test$price))
 
 
-# Plotando as previsıes e os preÁos da base de teste
+# Plotando as previs√µes e os pre√ßos da base de teste
 ggplot(data_test, aes(x = pred2, y = price)) + 
   geom_point() + 
   geom_abline() +
-  xlab("Previs„o")+ ylab ("Log PreÁo Real")
+  xlab("Previs√£o")+ ylab ("Log Pre√ßo Real")
 
 
 
@@ -198,7 +198,7 @@ dados <- select(data, price, area, price_by_sqm,
                 garage, latitude, longitude)
 
 
-#PreÁo do condomÌnio em n˙mero
+#Pre√ßo do condom√≠nio em n√∫mero
 dados$condominium_fee <- as.numeric(
   gsub(".", "", 
        gsub("R$", "", 
@@ -206,7 +206,7 @@ dados$condominium_fee <- as.numeric(
             fixed = T),
        fixed = T ))
 
-#PreÁo do condomÌnio em n˙mero
+#Pre√ßo do condom√≠nio em n√∫mero
 dados$iptu <- as.numeric(
   gsub(".", "", 
        gsub("R$", "", 
@@ -214,7 +214,7 @@ dados$iptu <- as.numeric(
             fixed = T),
        fixed = T ))
 
-#Retirando que n„o tem latitude ou longitude
+#Retirando que n√£o tem latitude ou longitude
 dados <- dados[!(dados$latitude==""),]
 
 #Arrumando as latitudes e longitudes
@@ -264,11 +264,11 @@ summary(modelo)
 
 
 
-#Fazendo previsıes
+#Fazendo previs√µes
 data_train$pred <- predict(modelo)
 data_test$pred <- predict(modelo,newdata=data_test)
 
-# Dando uma olhada na raÌz do erro quadrado mÈdio e no desvio padr„o dos preÁos
+# Dando uma olhada na ra√≠z do erro quadrado m√©dio e no desvio padr√£o dos pre√ßos
 (rmse_train <- RMSE(data_train$pred, data_train$price))
 (rmse_test <- RMSE(data_test$pred, data_test$price))
 sd(dados$price)
